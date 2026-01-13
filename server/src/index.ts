@@ -38,10 +38,13 @@ app.use(limiter);
 app.use(hpp()); // HTTP Parameter Pollution
 app.use(morgan('dev'));
 
+import cronRoutes from './routes/cron';
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/cron', cronRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the SolveIt API' });
