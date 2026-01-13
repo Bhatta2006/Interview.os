@@ -36,7 +36,7 @@ model Question {
 model User {
   id            String      @id @default(uuid())
   email         String      @unique
-  password      String?     // Nullable for OAuth users
+  password      String?
   googleId      String?     @unique
   name          String?
   avatarUrl     String?
@@ -45,8 +45,32 @@ model User {
   lastActive    DateTime?
   progress      Progress[]
   streakLogs    StreakLog[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device    String?  // Fingerprint hash
+  ip        String?
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // e.g. "UPDATE_PROGRESS", "LOGIN_FAILED"
+  details   String?  // JSON string
+  ip        String?
+  createdAt DateTime @default(now())
 }
 
 enum Status {
