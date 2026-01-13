@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  logoUrl   String?
+  questions Question[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Question {
+  id          String     @id @default(uuid())
+  companyId   String
+  company     Company    @relation(fields: [companyId], references: [id])
+  title       String
+  frequency   String     // Stored as string, e.g., "High", "Low", or specific count
+  topic       String
+  leetcodeUrl String
+  difficulty  String?
+  progress    Progress[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([companyId, title])
+}
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password      String?     // Nullable for OAuth users
+  googleId      String?     @unique
+  name          String?
+  avatarUrl     String?
+  currentStreak Int         @default(0)
+  longestStreak Int         @default(0)
+  lastActive    DateTime?
+  progress      Progress[]
+  streakLogs    StreakLog[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum Status {
+  PENDING
+  DONE
+  REVISING
+}
+
+model Progress {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  questionId String
+  question   Question  @relation(fields: [questionId], references: [id])
+  status     Status    @default(PENDING)
+  solvedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([userId, questionId])
+}
+
+model StreakLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime // Can store as midnight Date object
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
