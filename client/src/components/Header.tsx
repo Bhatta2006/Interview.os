@@ -1,13 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Trophy, LogOut, User as UserIcon } from 'lucide-react'; // Added Icons
+import { Search, Trophy, LogOut, User as UserIcon } from 'lucide-react';
 import useStore from '@/store/useStore';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const { user, logout } = useStore();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -32,7 +38,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          {user ? (
+          {mounted && user ? (
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3 border border-white/20 px-3 py-1">
                 <span className="text-xs text-terminal-green animate-pulse">●</span>
