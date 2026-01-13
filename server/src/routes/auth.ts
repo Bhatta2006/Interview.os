@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { signupSchema, loginSchema } from '../utils/validation';
+import { z } from 'zod';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -10,13 +12,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-change-this';
 
 // SIGNUP
 router.post('/signup', async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
   try {
+    const { name, email, password } = signupSchema.parse(req.body);
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
@@ -35,7 +33,10 @@ router.post('/signup', async (req, res) => {
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
     console.error('Signup error:', error);
     res.status(500).json({ error: 'Signup failed' });
   }

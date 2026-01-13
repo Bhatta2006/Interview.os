@@ -8,6 +8,7 @@ import hpp from 'hpp';
 import companyRoutes from './routes/companies';
 import userRoutes from './routes/user';
 import authRoutes from './routes/auth';
+import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -45,6 +46,8 @@ app.use('/api/user', userRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the SolveIt API' });
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

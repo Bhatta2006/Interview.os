@@ -1,0 +1,21 @@
+{
+  "name": "INTERVIEW.OS",
+  "short_name": "INTERVIEW.OS",
+  "description": "Underground Interview Terminal used to track LeetCode progress.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
