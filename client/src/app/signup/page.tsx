@@ -23,11 +23,53 @@ export default function SignupPage() {
     setError('');
 
     try {
-      const res = await api.post('/auth/signup', { name, email, password });
-      login(res.data.user, res.data.token);
-      router.push('/dashboard');
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error("API returned invalid JSON");
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      // Success
+      // Note: The new API only returns { success: true, user: ... }, it might DOES NOT return a JWT token in the user request example.
+      // But the existing `login` store expects a token.
+      // If the user's provided code example didn't return a token, we might break the login flow.
+      // The user's code: return NextResponse.json({ success: true })
+      // Wait, if there is no token, we can't login locally.
+      // I will assume the user wants me to follow their code EXACTLY.
+      // If so, I should redirect to login page? Or auto-login?
+      // User said: "It must return 405 Method Not Allowed (not 404)". 
+      // User example code did NOT show token generation.
+      // I will follow the user's instruction for the route, but I should probably add token generation if I want the app to actually work after signup.
+      // However, strict adherence first.
+
+      // Checking local implementation...
+      // My local route implementation (step 1018) DID NOT include token generation because I followed the user's snippet blindly?
+      // Wait, in step 1014 I wrote the route. I actually DID NOT include jwt.
+      // I followed the user snippet: `return NextResponse.json({ success: true })` (User said this).
+      // Actually in step 1014 I added `user: { id... }` but no token.
+
+      // So, we cannot `login(res.data.user, res.data.token)`.
+      // We should probably redirect to /login.
+
+      router.push('/login?registered=true');
+
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+      console.error(err);
+      setError(err.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
