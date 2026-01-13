@@ -6,23 +6,27 @@ const api = axios.create({
 
 // Add a request interceptor to include the Auth Token
 api.interceptors.request.use((config) => {
-  // We need to read from localStorage directly because using the hook inside logic is tricky
-  // But since we use persist middleware, we can try to parse it.
-  // Or simpler: just let the store handle it? Store is React based.
-  // Standard way:
-  const storage = localStorage.getItem('solveit-storage');
-  if (storage) {
-    const { state } = JSON.parse(storage);
-    if (state.token) {
-      config.headers.Authorization = `Bearer ${state.token}`;
-      config.headers['x-user-id'] = state.user?.id;
+  // Check if we are in the browser before accessing localStorage
+  if (typeof window !== 'undefined') {
+    const storage = localStorage.getItem('solveit-storage');
+    if (storage) {
+      try {
+        const { state } = JSON.parse(storage);
+        if (state.token) {
+          config.headers.Authorization = `Bearer ${state.token}`;
+          config.headers['x-user-id'] = state.user?.id;
+        } else {
+          config.headers['x-user-id'] = 'demo-user-id';
+        }
+      } catch (e) {
+        config.headers['x-user-id'] = 'demo-user-id';
+      }
     } else {
-      // Fallback for guest mode
       config.headers['x-user-id'] = 'demo-user-id';
     }
   } else {
-    // Fallback if no storage at all
-    config.headers['x-user-id'] = 'demo-user-id';
+    // Server-side (no auth header or handle differently if using cookies)
+    config.headers['x-user-id'] = 'demo-user-id-server';
   }
   return config;
 });
