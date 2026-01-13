@@ -41,10 +41,11 @@ app.use(morgan('dev'));
 import cronRoutes from './routes/cron';
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/companies', companyRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/cron', cronRoutes);
+// Routes - Support both /api prefix (local) and root (potentially stripped by Vercel)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/companies', '/companies'], companyRoutes);
+app.use(['/api/user', '/user'], userRoutes);
+app.use(['/api/cron', '/cron'], cronRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the SolveIt API' });
